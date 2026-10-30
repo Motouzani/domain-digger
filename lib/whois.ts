@@ -113,9 +113,11 @@ export const getWhoisSummary = async (
         : rawValue
       : '';
 
+    // Some registries separate key and value with tabs (e.g. .be).
+    const normalized = rawString.toLowerCase().replace(/[ \t]+/g, ' ');
     if (
       UNREGISTERED_INDICATORS.some((indicator) =>
-        rawString.toLowerCase().includes(indicator),
+        normalized.includes(indicator),
       )
     ) {
       return {

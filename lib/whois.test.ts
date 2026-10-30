@@ -48,4 +48,24 @@ describe('getWhoisSummary', () => {
       dnssec: null,
     });
   });
+
+  it('detects an unregistered domain when the status is tab-separated', async () => {
+    // DNS Belgium (.be) answers "Status:\tAVAILABLE".
+    whoisDomain.mockResolvedValue({
+      'whois.dns.be': { __raw: 'Domain:\texample.be\nStatus:\tAVAILABLE\r\n' },
+    });
+    expect(await getWhoisSummary('example.be')).toEqual({ registered: false });
+  });
+
+  it('keeps a registered domain registered when the status is tab-separated', async () => {
+    whoisDomain.mockResolvedValue({
+      'whois.dns.be': {
+        Registrar: 'Example registrar',
+        __raw: 'Domain:\texample.be\nStatus:\tNOT AVAILABLE\r\n',
+      },
+    });
+    expect(await getWhoisSummary('example.be')).toMatchObject({
+      registered: true,
+    });
+  });
 });
